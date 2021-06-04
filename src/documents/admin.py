@@ -1,4 +1,6 @@
+import csv
 from django.contrib import admin
+from django.http import HttpResponse
 
 from .models import Correspondent, Document, DocumentType, Tag, \
     SavedView, SavedViewFilterRule
@@ -6,7 +8,19 @@ from .models import Correspondent, Document, DocumentType, Tag, \
 
 @admin.action(description='Export to CSV')
 def export_to_csv(modeladmin, request, queryset):
-    pass
+
+    meta = modeladmin.model._meta
+    field_names = [field.name for field in meta.fields]
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename={}.csv'.format(meta)
+    writer = csv.writer(response)
+
+    writer.writerow(field_names)
+    for obj in queryset:
+        row = writer.writerow([getattr(obj, field) for field in field_names])
+
+    return response
 
 
 class CorrespondentAdmin(admin.ModelAdmin):
@@ -31,6 +45,7 @@ class TagAdmin(admin.ModelAdmin):
     )
     list_filter = ("color", "matching_algorithm")
     list_editable = ("color", "match", "matching_algorithm")
+    actions = [export_to_csv]
 
 
 class DocumentTypeAdmin(admin.ModelAdmin):
