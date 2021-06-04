@@ -4,6 +4,11 @@ from .models import Correspondent, Document, DocumentType, Tag, \
     SavedView, SavedViewFilterRule
 
 
+@admin.action(description='Export to CSV')
+def export_to_csv(modeladmin, request, queryset):
+    pass
+
+
 class CorrespondentAdmin(admin.ModelAdmin):
 
     list_display = (
@@ -13,6 +18,7 @@ class CorrespondentAdmin(admin.ModelAdmin):
     )
     list_filter = ("matching_algorithm",)
     list_editable = ("match", "matching_algorithm")
+    actions = [export_to_csv]
 
 
 class TagAdmin(admin.ModelAdmin):
